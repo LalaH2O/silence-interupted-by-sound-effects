@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Silence</title>
+</head>
+
+<body>
+  <main class="player">
+    <h1>Silence interrupted by ...</h1>
+
+    <div class="drop-zone" id="dropZone">
+      <strong>Drop an audio file here</strong>
+      <p>or select a file from your computer</p>
+
+      <label class="button" for="fileInput">
+        Choose audio file
+      </label>
+
+      <input
+        type="file"
+        id="fileInput"
+        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.opus"
+      >
+    </div>
+
+    <div class="track" id="trackName">
+      No file selected
+    </div>
+
+    <audio id="audioPlayer" controls hidden></audio>
+
+    <p class="status" id="status" aria-live="polite">
+      Your files stay on your device.
+    </p>
+
+    <button onclick="toggle_silence()" hidden id="toggle_silence">Play/Pause</button>
+    <span id = "playind">not playing</span>
+    <br>
+    <input id="mindelay"> <label for="mindelay">minimum delay</label>
+  </main>
+
+  <script>
+    // AI code
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("fileInput");
+    const audioPlayer = document.getElementById("audioPlayer");
+    const trackName = document.getElementById("trackName");
+    const status = document.getElementById("status");
+    const toggle_button = document.getElementById("toggle_silence");
+    const pind = document.getElementById("playind");
+
+    let currentUrl = null;
+
+    function loadAudio(file) {
+      if (!file) return;
+
+      // Accept common audio formats, including files with
+      // an unrecognized MIME type.
+      const allowedExtensions =
+        /\.(mp3|wav|ogg|m4a|aac?)$/i;
+
+      if (
+        !file.type.startsWith("audio/") &&
+        !allowedExtensions.test(file.name)
+      ) {
+        status.textContent = "Please select a supported audio file.";
+        return;
+      }
+
+      // Release the previous local file URL.
+      if (currentUrl) {
+        URL.revokeObjectURL(currentUrl);
+      }
+
+      currentUrl = URL.createObjectURL(file);
+
+      audioPlayer.pause();
+      audioPlayer.src = currentUrl;
+      audioPlayer.load();
+      audioPlayer.pause();
+      toggle_button.hidden = false;
+
+      trackName.textContent = file.name;
+      status.textContent = "Ready to play (Propably). Your file was not uploaded.";
+    }
+
+    // File picker
+    fileInput.addEventListener("change", () => {
+      loadAudio(fileInput.files[0]);
+
+      // Allow selecting the same file again.
+      fileInput.value = "";
+    });
+
+    // Prevent the browser from opening dropped files itself.
+    ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+      document.addEventListener(eventName, event => {
+        event.preventDefault();
+      });
+    });
+
+    // Highlight the drop zone while dragging a file over it.
+    ["dragenter", "dragover"].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => {
+        dropZone.classList.add("dragging");
+      });
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      dropZone.addEventListener(eventName, event => {
+        if (
+          eventName === "drop" ||
+          !dropZone.contains(event.relatedTarget)
+        ) {
+          dropZone.classList.remove("dragging");
+        }
+      });
+    });
+
+    // Handle dropped files.
+    dropZone.addEventListener("drop", event => {
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        loadAudio(files[0]);
+      }
+    });
+
+    // Clean up the temporary URL when the page is closed.
+    window.addEventListener("beforeunload", () => {
+      if (currentUrl) {
+        URL.revokeObjectURL(currentUrl);
+      }
+    });
+  </script>
+
+  <script>
+    let maxdelay;
+    let mindelay;
+
+    let timer;
+
+    async function playAudio() {
+      const player = document.getElementById("audioPlayer");
+
+      try {
+        await player.play();
+      } catch (error) {
+        console.error("Could not play audio:", error);
+      }
+    }
+
+    function myFunction() {
+        console.log("Function called!");
+        playAudio()
+
+        const delay = Math.random() * (maxdelay-mindelay) + mindelay;
+        timer = setTimeout(myFunction, delay);
+    }
+
+    function stopFunction() {
+        clearTimeout(timer);
+    }
+
+    // Me code
+
+   
+    let silence_on = false
+
+
+
+    function toggle_silence() {
+        silence_on = !silence_on
+        if (silence_on) {
+            pind.innerHTML = "playing"
+            mindelay = 1000
+            maxdelay = 10000
+            myFunction();
+        }else{
+            pind.innerHTML = "not playing"
+            stopFunction();
+        }
+    }
+  </script>
+</body>
+</html>
