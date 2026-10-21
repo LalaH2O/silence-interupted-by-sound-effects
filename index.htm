@@ -40,6 +40,7 @@
     <span id = "playind">not playing</span>
     <br>
     <input id="mindelay"> <label for="mindelay">minimum delay</label>
+    <input id="maxdelay"> <label for="maxdelay">maximum delay</label>
   </main>
 
   <script>
@@ -51,6 +52,8 @@
     const status = document.getElementById("status");
     const toggle_button = document.getElementById("toggle_silence");
     const pind = document.getElementById("playind");
+    const maxdelayi = document.getElementById("maxdelay");
+    const mindelayi = document.getElementById("mindelay");
 
     let currentUrl = null;
 
@@ -175,8 +178,8 @@
         silence_on = !silence_on
         if (silence_on) {
             pind.innerHTML = "playing"
-            mindelay = 1000
-            maxdelay = 10000
+            mindelay = mindelayi.value
+            maxdelay = maxdelayi.value
             myFunction();
         }else{
             pind.innerHTML = "not playing"
